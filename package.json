@@ -7,7 +7,8 @@
     "main": false
   },
   "scripts": {
-    "start": "parcel index.html"
+    "start": "parcel index.html",
+    "build": "parcel build index.html"
   },
   "author": "Roman K",
   "license": "ISC",
@@ -15,6 +16,7 @@
     "phaser": "^3.55.2"
   },
   "devDependencies": {
+    "@parcel/resolver-glob": "^2.7.0",
     "assert": "^2.0.0",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
