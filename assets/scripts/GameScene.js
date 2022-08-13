@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser, { Utils } from 'phaser';
 import Card from './Card';
 
 import * as cardsIMGS from '../sprites/*.png';
@@ -11,15 +11,13 @@ class GameScene extends Phaser.Scene {
 
   constructor() {
     super('Game'); // run constructor of paren class
-
-    console.log(cardsIMGS);
   }
 
   preload() {
     // 1. load background
     this.load.image('bg', background); // key (file name), path
 
-    // 2. Load  card
+    // 2. Load  cards
     for (let key in cardsIMGS) {
       this.load.image(key, cardsIMGS[key]);
 
@@ -27,8 +25,6 @@ class GameScene extends Phaser.Scene {
         this.cardsKeys.push(key);
       }
     }
-
-    console.log(this.cardsKeys);
   }
 
   create() {
@@ -46,9 +42,11 @@ class GameScene extends Phaser.Scene {
     this.cards = [];
     const positions = this.getCardPositions();
 
+    Phaser.Utils.Array.Shuffle(positions); // Ramdomly shuffling the array with Phaser.Utils
+
     for (let i = 0; i < this.cardsKeys.length; i++) {
       for (let j = 0; j < 2; j++) {
-        this.cards.push(new Card(this, positions.pop(j), this.cardsKeys[i])); // using prefabs
+        this.cards.push(new Card(this, positions.pop(), this.cardsKeys[i])); // using prefabs
       }
     }
   }
