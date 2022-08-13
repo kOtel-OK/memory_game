@@ -30,7 +30,6 @@ class GameScene extends Phaser.Scene {
   create() {
     this.createBackground();
     this.createCards();
-    this.openedCard = null;
   }
 
   createBackground() {
@@ -51,13 +50,13 @@ class GameScene extends Phaser.Scene {
         this.cards.push(new Card(this, positions.pop(), this.cardsKeys[i])); // using prefabs
       }
     }
+
     // listen to all interactive objects
-    this.input.on('gameobjectdown', this.onCardClick);
+    this.input.on('gameobjectdown', this.onCardClick.bind(this));
   }
 
   onCardClick(pointer, card) {
     // card - object which has been clicked
-
     if (card.isOpen) return false;
 
     if (this.openedCard) {
@@ -77,6 +76,11 @@ class GameScene extends Phaser.Scene {
     } else {
       this.openedCard = card;
       card.open();
+    }
+
+    // check if all cards opened
+    if (this.cards.every(el => el.isOpen)) {
+      this.createCards();
     }
   }
 
