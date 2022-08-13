@@ -30,6 +30,7 @@ class GameScene extends Phaser.Scene {
   create() {
     this.createBackground();
     this.createCards();
+    this.openedCard = null;
   }
 
   createBackground() {
@@ -40,6 +41,7 @@ class GameScene extends Phaser.Scene {
   createCards() {
     // Display cards on canvas
     this.cards = [];
+
     const positions = this.getCardPositions();
 
     Phaser.Utils.Array.Shuffle(positions); // Ramdomly shuffling the array with Phaser.Utils
@@ -48,6 +50,33 @@ class GameScene extends Phaser.Scene {
       for (let j = 0; j < 2; j++) {
         this.cards.push(new Card(this, positions.pop(), this.cardsKeys[i])); // using prefabs
       }
+    }
+    // listen to all interactive objects
+    this.input.on('gameobjectdown', this.onCardClick);
+  }
+
+  onCardClick(pointer, card) {
+    // card - object which has been clicked
+
+    if (card.isOpen) return false;
+
+    if (this.openedCard) {
+      if (this.openedCard.key === card.key) {
+        card.open();
+        this.openedCard = null;
+      } else {
+        card.open();
+
+        setTimeout(function () {
+          card.close();
+        }, 500);
+
+        this.openedCard.close();
+        this.openedCard = null;
+      }
+    } else {
+      this.openedCard = card;
+      card.open();
     }
   }
 
