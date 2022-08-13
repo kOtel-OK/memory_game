@@ -30,6 +30,18 @@ class GameScene extends Phaser.Scene {
   create() {
     this.createBackground();
     this.createCards();
+    this.start();
+  }
+
+  start() {
+    const positions = this.getCardPositions();
+
+    this.cards.forEach(el => {
+      let position = positions.pop();
+
+      el.close();
+      el.setPosition(position.x, position.y);
+    });
   }
 
   createBackground() {
@@ -41,13 +53,9 @@ class GameScene extends Phaser.Scene {
     // Display cards on canvas
     this.cards = [];
 
-    const positions = this.getCardPositions();
-
-    Phaser.Utils.Array.Shuffle(positions); // Ramdomly shuffling the array with Phaser.Utils
-
     for (let i = 0; i < this.cardsKeys.length; i++) {
       for (let j = 0; j < 2; j++) {
-        this.cards.push(new Card(this, positions.pop(), this.cardsKeys[i])); // using prefabs
+        this.cards.push(new Card(this, this.cardsKeys[i])); // using prefabs
       }
     }
 
@@ -80,7 +88,7 @@ class GameScene extends Phaser.Scene {
 
     // check if all cards opened
     if (this.cards.every(el => el.isOpen)) {
-      this.createCards();
+      this.start();
     }
   }
 
@@ -93,8 +101,8 @@ class GameScene extends Phaser.Scene {
     const cardWidth = cardTexture.width + margin;
     const cardHight = cardTexture.height + margin;
 
-    const offsetX = (width - cardWidth * this.cols) / 2;
-    const offsetY = (height - cardHight * this.rows) / 2;
+    const offsetX = (width - cardWidth * this.cols) / 2 + cardWidth / 2;
+    const offsetY = (height - cardHight * this.rows) / 2 + cardHight / 2;
 
     const positions = [];
 
@@ -107,7 +115,7 @@ class GameScene extends Phaser.Scene {
       }
     }
 
-    return positions;
+    return Phaser.Utils.Array.Shuffle(positions); // Ramdomly shuffling the array with Phaser.Utils
   }
 }
 
