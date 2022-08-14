@@ -1,4 +1,5 @@
 import Phaser, { Utils } from 'phaser';
+import WebFontFile from './WebFontFile';
 import Card from './Card';
 
 import * as cardsIMGS from '../sprites/*.png';
@@ -14,6 +15,8 @@ class GameScene extends Phaser.Scene {
   }
 
   preload() {
+    // this.load.text()
+    this.load.addFile(new WebFontFile(this.load, 'Press Start 2P'));
     // 1. load background
     this.load.image('bg', background); // key (file name), path
 
@@ -29,6 +32,7 @@ class GameScene extends Phaser.Scene {
 
   create() {
     this.createBackground();
+    this.createText();
     this.createCards();
     this.start();
   }
@@ -47,6 +51,13 @@ class GameScene extends Phaser.Scene {
   createBackground() {
     // Display backgound on Canvas
     this.add.sprite(0, 0, 'bg').setOrigin(0, 0); // Canvas coord X, Canvas coord Y, key (from preloader)
+  }
+
+  createText() {
+    this.timeoutText = this.add.text(20, 350, 'Time', {
+      fontFamily: '"Press Start 2P"', //For fonts with spaces in the name we need to include double quotes
+      fontSize: '16px',
+    });
   }
 
   createCards() {
