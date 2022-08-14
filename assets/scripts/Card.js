@@ -14,34 +14,35 @@ class Card extends Phaser.GameObjects.Sprite {
 
   open() {
     this.isOpen = true;
-    this.flip(this.key);
+    this.flip();
   }
 
   close() {
     this.isOpen = false;
-    this.flip('card');
+    this.flip();
   }
 
-  flip(texture) {
+  flip() {
     this.scene.tweens.add({
       targets: this, // GameObjects for animation
       scaleX: 0, // Property wich we should change and value
       ease: 'linear', // Type of animation
-      duration: 250, // Duration of animation in ms
+      duration: 50, // Duration of animation in ms
       onComplete: () => {
-        this.show(texture);
+        this.show();
       },
     });
   }
 
-  show(texture) {
+  show() {
+    const texture = this.isOpen ? this.key : 'card';
     this.setTexture(texture);
 
     this.scene.tweens.add({
       targets: this,
       scaleX: 1,
       ease: 'linear',
-      duration: 250,
+      duration: 350,
     });
   }
 }

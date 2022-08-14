@@ -9,18 +9,21 @@ class GameScene extends Phaser.Scene {
   rows = 2; // amount of rows
   cols = 5; // amount of cols
   cardsKeys = [];
+  gameCounter = 0;
+  timeOut = 30;
 
   constructor() {
     super('Game'); // run constructor of paren class
   }
 
   preload() {
-    // this.load.text()
+    // 1. Load font
     this.load.addFile(new WebFontFile(this.load, 'Press Start 2P'));
-    // 1. load background
+
+    // 2. load background
     this.load.image('bg', background); // key (file name), path
 
-    // 2. Load  cards
+    // 3. Load  cards
     for (let key in cardsIMGS) {
       this.load.image(key, cardsIMGS[key]);
 
@@ -34,18 +37,20 @@ class GameScene extends Phaser.Scene {
     this.createBackground();
     this.createText();
     this.createCards();
-    this.start();
+    this.gameStart();
   }
 
-  start() {
+  gameStart() {
     const positions = this.getCardPositions();
 
     this.cards.forEach(el => {
+      if (this.gameCounter) el.close();
       let position = positions.pop();
 
-      el.close();
       el.setPosition(position.x, position.y);
     });
+
+    this.createTimer();
   }
 
   createBackground() {
@@ -54,10 +59,37 @@ class GameScene extends Phaser.Scene {
   }
 
   createText() {
-    this.timeoutText = this.add.text(20, 350, 'Time', {
+    this.timeoutText = this.add.text(20, 350, `Time:${this.timeOut}`, {
       fontFamily: '"Press Start 2P"', //For fonts with spaces in the name we need to include double quotes
       fontSize: '16px',
     });
+  }
+
+  onTimerTick() {
+    if (this.timeOut <= 0) {
+      this.gameStop();
+      this.gameStart();
+    }
+
+    this.timeoutText.setText(`Time:${this.timeOut}`);
+    this.timeOut--;
+  }
+
+  createTimer() {
+    this.timeOutEvent = this.time.addEvent({
+      delay: 1000, // Callback delaying in ms
+      loop: true,
+      callback() {
+        this.onTimerTick();
+      },
+      callbackScope: this, // Pointer to outer this
+    });
+  }
+
+  gameStop() {
+    this.time.removeEvent(this.timeOutEvent);
+    this.gameCounter++;
+    this.timeOut = 30;
   }
 
   createCards() {
@@ -99,7 +131,8 @@ class GameScene extends Phaser.Scene {
 
     // check if all cards opened
     if (this.cards.every(el => el.isOpen)) {
-      this.start();
+      this.gameStop();
+      this.gameStart();
     }
   }
 
