@@ -3,14 +3,17 @@ import WebFontFile from './WebFontFile';
 import Card from './Card';
 
 import * as cardsIMGS from '../sprites/*.png';
+import sounds from 'url:../sounds/*.mp3';
+
 import background from '../sprites/background.jpg';
 
 class GameScene extends Phaser.Scene {
   rows = 2; // amount of rows
   cols = 5; // amount of cols
   cardsKeys = [];
+  soundKeys = [];
   gameCounter = 0;
-  timeOut = 30;
+  timeOut = 60;
 
   constructor() {
     super('Game'); // run constructor of paren class
@@ -31,12 +34,19 @@ class GameScene extends Phaser.Scene {
         this.cardsKeys.push(key);
       }
     }
+
+    // 4. Load sounds
+    for (let key in sounds) {
+      this.load.audio(key, sounds[key]);
+      this.soundKeys.push(key);
+    }
   }
 
   create() {
     this.createBackground();
     this.createText();
     this.createCards();
+    this.createSounds();
     this.gameStart();
   }
 
@@ -49,8 +59,14 @@ class GameScene extends Phaser.Scene {
 
       el.setPosition(position.x, position.y);
     });
-
+    this.playSound('theme', 0.1);
     this.createTimer();
+  }
+
+  gameStop() {
+    this.time.removeEvent(this.timeOutEvent);
+    this.gameCounter++;
+    this.timeOut = 60;
   }
 
   createBackground() {
@@ -65,8 +81,22 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  createSounds() {
+    // Adding 5 sounds to object
+    // {card, complete, success, theme, timeout}
+    this.sounds = {};
+    this.soundKeys.forEach(el => (this.sounds[el] = this.sound.add(el)));
+  }
+
+  playSound(key, vol) {
+    this.sounds[key].play({
+      volume: vol,
+    });
+  }
+
   onTimerTick() {
     if (this.timeOut <= 0) {
+      this.playSound('timeout');
       this.gameStop();
       this.gameStart();
     }
@@ -84,12 +114,6 @@ class GameScene extends Phaser.Scene {
       },
       callbackScope: this, // Pointer to outer this
     });
-  }
-
-  gameStop() {
-    this.time.removeEvent(this.timeOutEvent);
-    this.gameCounter++;
-    this.timeOut = 30;
   }
 
   createCards() {
@@ -112,9 +136,12 @@ class GameScene extends Phaser.Scene {
 
     if (this.openedCard) {
       if (this.openedCard.key === card.key) {
+        this.playSound('success');
         card.open();
+
         this.openedCard = null;
       } else {
+        this.playSound('card');
         card.open();
 
         setTimeout(function () {
@@ -126,11 +153,13 @@ class GameScene extends Phaser.Scene {
       }
     } else {
       this.openedCard = card;
+      this.playSound('card');
       card.open();
     }
 
     // check if all cards opened
     if (this.cards.every(el => el.isOpen)) {
+      this.playSound('complete');
       this.gameStop();
       this.gameStart();
     }
