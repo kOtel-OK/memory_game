@@ -6,7 +6,8 @@ import * as Constants from './constants';
 import * as cardsIMGS from '../sprites/*.png';
 import sounds from 'url:../sounds/*.mp3';
 
-import background from '../sprites/background.jpg';
+import background from '../sprites/background/background.png';
+import playBtn from '../sprites/buttons/play_btn.png';
 
 class GameScene extends Phaser.Scene {
   rows = 2; // amount of rows
@@ -18,19 +19,19 @@ class GameScene extends Phaser.Scene {
 
   constructor() {
     super(); // run constructor of paren class
-    console.log(Constants);
   }
 
   preload() {
-    console.log(this.game.config);
-
     // 1. Load font
     this.load.addFile(new WebFontFile(this.load, 'Press Start 2P'));
 
     // 2. load background
     this.load.image('bg', background); // key (file name), path
 
-    // 3. Load  cards
+    // 4. Load play button
+    this.load.image('playbtn', playBtn);
+
+    // 4. Load  cards
     for (let key in cardsIMGS) {
       this.load.image(key, cardsIMGS[key]);
 
@@ -39,7 +40,7 @@ class GameScene extends Phaser.Scene {
       }
     }
 
-    // 4. Load sounds
+    // 5. Load sounds
     for (let key in sounds) {
       this.load.audio(key, sounds[key]);
       this.soundKeys.push(key);
@@ -48,33 +49,58 @@ class GameScene extends Phaser.Scene {
 
   create() {
     this.createBackground();
-    this.createText();
-    this.createCards();
     this.createSounds();
-    this.gameStart();
+    this.getCardPositions();
+    this.initGame();
+  }
+
+  initGame() {
+    this.createPlayBtn();
+    // this.playSound('theme', 0.1, true);
+    this.timeoutText?.destroy();
   }
 
   gameStart() {
-    const positions = this.getCardPositions();
+    const positions = [...Phaser.Utils.Array.Shuffle(this.positions)];
+
+    this.playBtn.destroy();
+    this.createText();
+    this.createCards();
 
     this.cards.forEach((el, idx) => {
-      if (this.gameCounter) el.close();
-
-      el.setCardOnPosition(positions.pop(), idx * 100);
+      el.setCardOnPosition(positions.pop(), idx * 150);
     });
-    // this.playSound('theme', 0.1, true);
+
     this.createTimer();
   }
 
-  gameStop() {
+  gameEnd() {
     this.time.removeEvent(this.timeOutEvent);
     this.gameCounter++;
     this.timeOut = Constants.TIMEOUT;
+
+    this.cards.forEach((el, idx) => {
+      el.getCardFromPosition(idx * 150);
+    });
+
+    setTimeout(() => {
+      this.initGame();
+    }, 1500);
   }
 
   createBackground() {
     // Display backgound on Canvas
     this.add.sprite(0, 0, 'bg').setOrigin(0, 0); // Canvas coord X, Canvas coord Y, key (from preloader)
+  }
+
+  createPlayBtn() {
+    this.playBtn = this.add.sprite(640, 350, 'playbtn');
+    this.playBtn.setInteractive();
+    this.playBtn.on('pointerdown', this.onPlayBtnClick.bind(this));
+  }
+
+  onPlayBtnClick() {
+    this.gameStart();
   }
 
   createText() {
@@ -101,8 +127,7 @@ class GameScene extends Phaser.Scene {
   onTimerTick() {
     if (this.timeOut <= 0) {
       this.playSound('timeout');
-      this.gameStop();
-      this.gameStart();
+      this.gameEnd();
     }
 
     this.timeoutText.setText(`Time:${this.timeOut}`);
@@ -164,12 +189,13 @@ class GameScene extends Phaser.Scene {
     // check if all cards opened
     if (this.cards.every(el => el.isOpen)) {
       this.playSound('complete');
-      this.gameStop();
-      this.gameStart();
+      this.gameEnd();
     }
   }
 
   getCardPositions() {
+    this.positions = [];
+
     const { width, height } = this.sys.game.config;
 
     const cardTexture = this.textures.get('card').getSourceImage();
@@ -181,18 +207,14 @@ class GameScene extends Phaser.Scene {
     const offsetX = (width - cardWidth * this.cols) / 2 + cardWidth / 2;
     const offsetY = (height - cardHight * this.rows) / 2 + cardHight / 2;
 
-    const positions = [];
-
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.cols; j++) {
-        positions.push({
+        this.positions.push({
           x: offsetX + cardWidth * j,
           y: offsetY + cardHight * i,
         });
       }
     }
-
-    return Phaser.Utils.Array.Shuffle(positions); // Ramdomly shuffling the array with Phaser.Utils
   }
 }
 
