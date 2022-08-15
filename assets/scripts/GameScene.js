@@ -1,6 +1,7 @@
 import Phaser, { Utils } from 'phaser';
 import WebFontFile from './WebFontFile';
 import Card from './Card';
+import * as Constants from './constants';
 
 import * as cardsIMGS from '../sprites/*.png';
 import sounds from 'url:../sounds/*.mp3';
@@ -13,13 +14,16 @@ class GameScene extends Phaser.Scene {
   cardsKeys = [];
   soundKeys = [];
   gameCounter = 0;
-  timeOut = 60;
+  timeOut = Constants.TIMEOUT;
 
   constructor() {
-    super('Game'); // run constructor of paren class
+    super(); // run constructor of paren class
+    console.log(Constants);
   }
 
   preload() {
+    console.log(this.game.config);
+
     // 1. Load font
     this.load.addFile(new WebFontFile(this.load, 'Press Start 2P'));
 
@@ -53,20 +57,19 @@ class GameScene extends Phaser.Scene {
   gameStart() {
     const positions = this.getCardPositions();
 
-    this.cards.forEach(el => {
+    this.cards.forEach((el, idx) => {
       if (this.gameCounter) el.close();
-      let position = positions.pop();
 
-      el.setPosition(position.x, position.y);
+      el.setCardOnPosition(positions.pop(), idx * 100);
     });
-    this.playSound('theme', 0.1);
+    // this.playSound('theme', 0.1, true);
     this.createTimer();
   }
 
   gameStop() {
     this.time.removeEvent(this.timeOutEvent);
     this.gameCounter++;
-    this.timeOut = 60;
+    this.timeOut = Constants.TIMEOUT;
   }
 
   createBackground() {
@@ -88,9 +91,10 @@ class GameScene extends Phaser.Scene {
     this.soundKeys.forEach(el => (this.sounds[el] = this.sound.add(el)));
   }
 
-  playSound(key, vol) {
+  playSound(key, vol, loop) {
     this.sounds[key].play({
       volume: vol,
+      loop: loop,
     });
   }
 

@@ -8,4 +8,4 @@ const config = {
   scene: new GameScene(), // game scene
 };
 
-const game = new Phaser.Game(config);
+new Phaser.Game(config);
