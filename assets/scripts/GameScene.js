@@ -1,6 +1,7 @@
 import Phaser, { Utils } from 'phaser';
 import WebFontFile from './WebFontFile';
 import Card from './Card';
+import LoadingBar from './LoadingBar';
 import * as Constants from './constants';
 
 import * as cardsIMGS from '../sprites/*.png';
@@ -22,6 +23,11 @@ class GameScene extends Phaser.Scene {
   }
 
   preload() {
+    new LoadingBar(this);
+    this.preloadAssets();
+  }
+
+  preloadAssets() {
     // 1. Load font
     this.load.addFile(new WebFontFile(this.load, 'Press Start 2P'));
 
@@ -56,7 +62,7 @@ class GameScene extends Phaser.Scene {
 
   initGame() {
     this.createPlayBtn();
-    // this.playSound('theme', 0.1, true);
+    this.playSound('theme', 0.1, true);
     this.timeoutText?.destroy();
   }
 

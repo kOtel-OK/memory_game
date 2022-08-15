@@ -13,6 +13,7 @@
   "author": "Roman K",
   "license": "ISC",
   "dependencies": {
+    "core-js": "^3.24.1",
     "phaser": "^3.55.2",
     "webfontloader": "^1.6.28"
   },
